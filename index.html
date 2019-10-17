@@ -1,0 +1,157 @@
+
+<!-- taken from https://bl.ocks.org/hrecht/f84012ee860cb4da66331f18d588eee3 -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Simple Bar chart</title>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+        }
+
+        .bar {
+            fill: #5f89ad;
+        }
+
+        .axis {
+            font-size: 13px;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            display: none;
+        }
+
+        .label {
+            font-size: 13px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h1>The skills JavaScript developers need today</h1>
+    <h3>(based on 300 job listings from tech companies in Aprile 2019)</h3>
+
+    <div id="graphic"></div>
+
+    <h4>* - In Use At NCTR</h4>
+
+    <script>
+        var data = [
+          { "name": "* React",                "value": 267, },
+          { "name": "Angular",                "value": 195, },
+          { "name": "* Node.js",              "value": 176, },
+          { "name": "* Git",                  "value": 107, },
+          { "name": "Redux",                  "value": 107, },
+          { "name": "* ECMAScript",           "value": 87, },
+          { "name": "Java",                   "value": 84, },
+          { "name": "* webpack",              "value": 72, },
+          { "name": "TypeScript",             "value": 71, },
+          { "name": "JQuery",                 "value": 63, },
+          { "name": "AWS",                    "value": 62, },
+          { "name": "Continuous Integration", "value": 62, },
+          { "name": "* REST APIs",            "value": 53, },
+          { "name": "* SQL",                  "value": 50, },
+          { "name": "* Docker",               "value": 50, },
+          { "name": "Python",                 "value": 47, },
+          { "name": "* Jest",                 "value": 44, },
+          { "name": "Vue.js",                 "value": 44, },
+          { "name": "* TDD",                  "value": 44, },
+          { "name": "* Design Patterns",      "value": 38, },
+          { "name": "* Unit Testing",         "value": 36, },
+          { "name": "* npm",                  "value": 30, },
+          { "name": "React Native",           "value": 30, },
+          { "name": "Mocha",                  "value": 29, },
+          { "name": "OOP",                    "value": 27, },
+          { "name": "* GraphQL",              "value": 24, }
+        ];
+
+        //sort bars based on value
+        data = data.sort(function (a, b) {
+            return d3.ascending(a.value, b.value);
+        })
+
+        //set up svg using margin conventions - we'll need plenty of room on the left for labels
+        var margin = {
+            top: 15,
+            right: 25,
+            bottom: 15,
+            left: 140
+        };
+
+        var width = 960 - margin.left - margin.right,
+            height = 900 - margin.top - margin.bottom;
+
+        var svg = d3.select("#graphic").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x = d3.scale.linear()
+            .range([0, width])
+            .domain([0, d3.max(data, function (d) {
+                return d.value;
+            })]);
+
+        var y = d3.scale.ordinal()
+            .rangeRoundBands([height, 0], .1)
+            .domain(data.map(function (d) {
+                return d.name;
+            }));
+
+        //make y axis to show bar names
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            //no tick marks
+            .tickSize(0)
+            .orient("left");
+
+        var gy = svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+
+        var bars = svg.selectAll(".bar")   // initially there are not any with .bat class
+            .data(data)
+            .enter()                     // add enough items under svg to match length data array
+            .append("g")
+
+        //append rects
+        bars.append("rect")
+            .attr("class", "bar")
+            .attr("y", function (d) {
+                return y(d.name);
+            })
+            .attr("height", y.rangeBand())
+            .attr("x", 0)
+            .attr("width", function (d) {
+                return x(d.value);           // rectangle width from data's .value
+            });
+
+        //add a value label to the right of each bar
+        bars.append("text")
+            .attr("class", "label")
+            //y position of the label is halfway down the bar
+            .attr("y", function (d) {
+                return y(d.name) + y.rangeBand() / 2 + 4;
+            })
+            //x position is 3 pixels to the right of the bar
+            .attr("x", function (d) {
+                return x(d.value) + 3;
+            })
+            .text(function (d) {
+                return d.value;
+            });
+
+    </script>
+
+</body>
+
+</html>
